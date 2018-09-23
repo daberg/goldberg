@@ -2,7 +2,7 @@ import graph_tool
 
 
 def debug(message):
-    #print("[Debug] " + message)
+    print("[Debug] " + message)
     pass
 
 
@@ -54,11 +54,19 @@ class FlowNetwork:
         for s_out in source.out_edges():
             cap = capacity[s_out]
 
+            # If capacity is 0, nothing to push
+            # Probably an added residual arc
+            # Skip cycle just for optimization
+            if cap == 0:
+                continue
+
             preflow[s_out] = cap
             preflow[reverse_edges[s_out]] = - cap
 
-            excess[s_out.target()] = cap
+            excess[s_out.target()] = excess[s_out.target()] + cap
             excess[source] = excess[source] - cap
+
+            debug("Saturated edge {}".format(s_out))
 
         debug("Initialized")
 
@@ -80,7 +88,7 @@ class FlowNetwork:
                     if (excess[cur_v] <= 0):
                         break
 
-            # No more admissible arcs
+            # No more admissible edges
             # Relabel if still active
             if (excess[cur_v] > 0):
                 self._relabel(cur_v, distance, capacity, preflow)
@@ -140,3 +148,37 @@ class FlowNetwork:
         debug("")
         for v in self.graph.vertices():
             debug("Vertex {}:\td={}\te={}".format(v, distance[v], excess[v]))
+
+
+import graph_tool.flow
+
+g = graph_tool.Graph(directed=True)
+
+capacity = g.new_edge_property("double")
+g.ep.capacity = capacity
+
+s = g.add_vertex()
+u = g.add_vertex()
+v = g.add_vertex()
+t = g.add_vertex()
+
+e_su = g.add_edge(s, u)
+e_ut = g.add_edge(u, t)
+e_sv = g.add_edge(s, v)
+e_vt = g.add_edge(v, t)
+
+e_us = g.add_edge(u, s)
+
+g.ep.capacity[e_su] = 5
+g.ep.capacity[e_ut] = 4
+g.ep.capacity[e_sv] = 6
+g.ep.capacity[e_vt] = 5
+
+g.ep.capacity[e_us] = 3
+
+net = FlowNetwork(g, capacity, s, t)
+print("Custom implementation detected flow: {}".format(net.push_relabel()))
+
+res = graph_tool.flow.push_relabel_max_flow(g, s, t, g.ep.capacity)
+res.a = g.ep.capacity.get_array() - res.get_array()
+print("BGL implementation detected flow: {}".format(sum(res[e] for e in t.in_edges())))
