@@ -12,8 +12,8 @@ def push_relabel(graph, source, target, capacity):
         debug.error("Capacity map does not refer to graph")
         raise ValueError()
 
-    if capacity.value_type() != "int":
-        debug.error("Capacity map type is not int")
+    if capacity.value_type()[:3] != "int":
+        debug.error("Capacity map type is {} instead of an integer type".format(capacity.value_type()))
         raise ValueError()
 
     # Add residual edges and create reverse edge map
@@ -86,7 +86,7 @@ def push_relabel(graph, source, target, capacity):
     debug.info("Reached optimal state")
     _debug_print(graph, capacity, preflow, distance, excess)
 
-    return excess[target]
+    return preflow
 
 def _create_residual_edges(graph, capacity):
     reverse_edges = graph.new_edge_property("object")
@@ -150,31 +150,3 @@ def _debug_print(graph, capacity, preflow, distance, excess):
     debug.info("")
     for v in graph.vertices():
         debug.info("Vertex {}:\td={}\te={}".format(v, distance[v], excess[v]))
-
-
-def test_implementations(graph, source, target, capacity):
-    import graph_tool.flow
-    import time
-
-    print("Running max flow implementation benchmark")
-    print()
-    print("Number of vertices:   {}".format(graph.num_vertices()))
-    print("Number of edges:      {}".format(graph.num_edges()))
-    print()
-
-    start = time.time()
-    maxflow = push_relabel(graph, source, target, capacity)
-    end = time.time()
-
-    print("Custom implementation detected flow: {}".format(maxflow))
-    print("Elapsed time: {} ms".format((end - start) * 1000.0))
-    print()
-
-    start = time.time()
-    res = graph_tool.flow.push_relabel_max_flow(graph, source, target, capacity)
-    end = time.time()
-
-    res.a = capacity.get_array() - res.get_array()
-    print("BGL implementation detected flow: {}".format(sum(res[e] for e in target.in_edges())))
-    print("Elapsed time: {} ms".format((end - start) * 1000.0))
-    print()

@@ -12,4 +12,4 @@ docker run                             \
     -e "PYTHONPATH=/opt/goldberg"      \
     -w /opt/goldberg                   \
     -v "$PACKAGEPATH":/opt/goldberg    \
-    tiagopeixoto/graph-tool $@
+    tiagopeixoto/graph-tool scripts/benchmark.sh

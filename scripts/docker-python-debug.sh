@@ -13,4 +13,4 @@ docker run                             \
     -e "GOLDBERGDEBUG=true"            \
     -w /opt/goldberg                   \
     -v "$PACKAGEPATH":/opt/goldberg    \
-    tiagopeixoto/graph-tool python3 -m pdb goldberg/main.py
+    tiagopeixoto/graph-tool python3 -m pdb $@
