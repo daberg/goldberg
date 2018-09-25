@@ -19,9 +19,11 @@ with open('benchmark/results/complete_graph_results.dat', "w") as outfile:
         for i in range(2, 150):
             results = benchmark_complete_graph(i)
 
-            print("Writing results to  complete_graph_results.dat\n")
+            print("Writing results to  complete_graph_results.dat\n\n\n")
 
             outfile.write("[{:d}, ".format(i) + json.dumps(results) + "]" + '\n')
 
     except KeyboardInterrupt:
         print("Interrupted")
+
+print("Completed benchmarks on complete graphs")
