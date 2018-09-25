@@ -1,60 +1,73 @@
+import goldberg.algo
 import graph_tool.flow
 import time
-import goldberg.algo
+import memory_profiler
 
 
 def benchmark_all(graph, source, target, capacity):
 
     results = []
 
+    print("Running benchmarks for all implementations")
     _print_separator()
+    print("Input stats")
+    print()
     print("Number of vertices:       {}".format(graph.num_vertices()))
     print("Number of edges:          {}".format(graph.num_edges()))
     _print_separator()
 
     # BGL implementation
-    ret = profilerun(
-        "BGL implementation",
+    name="BGL implementation"
+
+    residual_capacity, time, mem = profilerun(
         graph_tool.flow.push_relabel_max_flow,
         graph, source, target, capacity
     )
 
-    residual_capacity = ret[0]
     residual_capacity.a = capacity.get_array() - residual_capacity.get_array()
     maxflow = sum(residual_capacity[e] for e in target.in_edges())
 
-    result = _compose_result(maxflow, ret[1], ret[2])
-    results.append(result)
+    result = _compose_result(maxflow, time, mem)
+    results.append((name, result))
 
+    print("{} run stats".format(name))
+    print()
     _print_result(result)
     _print_separator()
 
     # Custom push-relabel implementation
-    ret = profilerun(
-        "custom push-relabel implementation",
+    name="Custom push-relabel"
+
+    flow, time, mem = profilerun(
         goldberg.algo.push_relabel,
         graph, source, target, capacity
     )
 
-    flow = ret[0]
     maxflow = sum(flow[e] for e in target.in_edges())
 
-    result = _compose_result(maxflow, ret[1], ret[2])
-    results.append(result)
+    result = _compose_result(maxflow, time, mem)
+    results.append((name, result))
 
+    print("{} run stats".format(name))
+    print()
     _print_result(result)
     _print_separator()
 
-def profilerun(name, func, graph, source, target, capacity):
-    print("Profiling {:s}...".format(name))
+    return results
 
+def profilerun(flownet_function, graph, source, target, capacity):
+    start_mem = memory_profiler.memory_usage(lambda: None, max_usage=True)[0]
     start_time = time.time()
-    ret = func(graph, source, target, capacity)
+
+    mem, ret = memory_profiler.memory_usage((flownet_function, [graph, source, target, capacity]), max_usage=True, retval=True)
+
     end_time = time.time()
+    end_mem = mem[0]
 
-    memory = 0
+    time_diff = end_time - start_time
+    mem_diff = end_mem - start_mem
 
-    return (ret, (end_time - start_time) * 1000.0, memory)
+    return (ret, time_diff * 1000.0, mem_diff * 1024)
 
 def _compose_result(maxflow, time, memory):
     result = {
@@ -67,7 +80,7 @@ def _compose_result(maxflow, time, memory):
 def _print_result(result):
     print("Computed maximum flow:    {}".format(result["maxflow"]))
     print("Elapsed time:             {} ms".format(result["time"]))
-    print("Allocated memory:         {}".format(result["memory"]))
+    print("Allocated memory:         {} KiB".format(result["memory"]))
 
 def _print_separator():
     print(separator)
