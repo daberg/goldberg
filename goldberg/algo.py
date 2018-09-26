@@ -39,7 +39,7 @@ def naive_push_relabel(graph, source, target, capacity):
 
     cur_v = helper.select_active(graph, excess, target)
     while cur_v:
-        debug.debug_print(graph, capacity, preflow, distance, excess)
+        debug.info_algo(graph, capacity, preflow, distance, excess)
 
         # Look for admissible edges
         for out_e in cur_v.out_edges():
@@ -63,7 +63,7 @@ def naive_push_relabel(graph, source, target, capacity):
         cur_v = helper.select_active(graph, excess, target)
 
     debug.info("Reached optimal state")
-    debug.debug_print(graph, capacity, preflow, distance, excess)
+    debug.info_algo(graph, capacity, preflow, distance, excess)
 
     return preflow
 
@@ -116,7 +116,7 @@ def stack_push_relabel(graph, source, target, capacity):
 
     cur_v = actives.pop()
     while cur_v:
-        debug.debug_print(graph, capacity, preflow, distance, excess)
+        debug.info_algo(graph, capacity, preflow, distance, excess)
 
         # Look for admissible edges
         for out_e in cur_v.out_edges():
@@ -147,6 +147,6 @@ def stack_push_relabel(graph, source, target, capacity):
         cur_v = actives.pop()
 
     debug.info("Reached optimal state")
-    debug.debug_print(graph, capacity, preflow, distance, excess)
+    debug.info_algo(graph, capacity, preflow, distance, excess)
 
     return preflow
