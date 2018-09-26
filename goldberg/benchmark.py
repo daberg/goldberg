@@ -1,10 +1,13 @@
-import goldberg.algo
+import goldberg.algo as algo
 import graph_tool.flow
 import time
 import memory_profiler
 
 
 def benchmark_all(graph, source, target, capacity):
+
+    graph.edge_properties["capacity"] = capacity
+    original_g = graph
 
     results = []
 
@@ -18,6 +21,9 @@ def benchmark_all(graph, source, target, capacity):
 
     # BGL implementation
     name="BGL implementation"
+
+    graph = original_g.copy()
+    capacity = graph.edge_properties["capacity"]
 
     residual_capacity, time, mem = profilerun(
         graph_tool.flow.push_relabel_max_flow,
@@ -35,11 +41,35 @@ def benchmark_all(graph, source, target, capacity):
     _print_result(result)
     _print_separator()
 
-    # Custom push-relabel implementation
-    name="Custom push-relabel"
+    # Stack push-relabel implementation
+    name="Stack push-relabel"
+
+    graph = original_g.copy()
+    capacity = graph.edge_properties["capacity"]
 
     flow, time, mem = profilerun(
-        goldberg.algo.push_relabel,
+        algo.stack_push_relabel,
+        graph, source, target, capacity
+    )
+
+    maxflow = sum(flow[e] for e in target.in_edges())
+
+    result = _compose_result(maxflow, time, mem)
+    results.append((name, result))
+
+    print("{} run stats".format(name))
+    print()
+    _print_result(result)
+    _print_separator()
+
+    # Naive push-relabel implementation
+    name="Naive push-relabel"
+
+    graph = original_g.copy()
+    capacity = graph.edge_properties["capacity"]
+
+    flow, time, mem = profilerun(
+        algo.naive_push_relabel,
         graph, source, target, capacity
     )
 
