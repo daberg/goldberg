@@ -1,6 +1,13 @@
 import os
 
 
+def debug_print(graph, capacity, preflow, distance, excess):
+    for e in graph.edges():
+        info("Edge {}:\tc={}\tf={}".format(e, capacity[e], preflow[e]))
+    info("")
+    for v in graph.vertices():
+        info("Vertex {}:\td={}\te={}".format(v, distance[v], excess[v]))
+
 def info(message):
     _print_functions["info"](message)
 
