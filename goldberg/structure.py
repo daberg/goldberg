@@ -1,15 +1,21 @@
-import collections
-
+class Node:
+    def __init__(self, data=None):
+        self.data = data
+        self.next = None
 
 class Stack:
     def __init__(self):
-        self._repr = collections.deque()
+        self.head = None
 
-    def push(self, element):
-        self._repr.append(element)
+    def push(self, data):
+        new = Node(data)
+        new.next = self.head
+        self.head = new
 
     def pop(self):
-        try:
-            return self._repr.pop()
-        except IndexError:
+        if self.head is None:
             return None
+        else:
+            tmp = self.head
+            self.head = self.head.next
+            return tmp.data
