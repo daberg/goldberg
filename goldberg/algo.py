@@ -43,7 +43,6 @@ def naive_push_relabel(graph, source, target, capacity):
 
         # Look for admissible edges
         for out_e in cur_v.out_edges():
-
             # If admissible, push flow
             if (distance[cur_v] > distance[out_e.target()]
                 and capacity[out_e] - preflow[out_e] > 0):
@@ -120,7 +119,6 @@ def stack_push_relabel(graph, source, target, capacity):
 
         # Look for admissible edges
         for out_e in cur_v.out_edges():
-
             # If admissible, push flow
             if (distance[cur_v] > distance[out_e.target()]
                 and capacity[out_e] - preflow[out_e] > 0):

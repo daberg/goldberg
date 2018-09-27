@@ -1,0 +1,875 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{indentfirst}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Goldberg's algorithm implementation and benchmarking in Python
+\end_layout
+
+\begin_layout Author
+Davide Bergamaschi
+\end_layout
+
+\begin_layout Date
+2018
+\end_layout
+
+\begin_layout Part*
+Abstract
+\end_layout
+
+\begin_layout Standard
+We hereby analyze the features of our implementation of Goldberg's push-relabel
+ algorithm and, leaning on benchmark results, show that the performance
+ of such implementation is essentially consistent with the theoretical results
+ from the literature.
+\end_layout
+
+\begin_layout Part*
+The implementation
+\end_layout
+
+\begin_layout Section*
+Technology
+\end_layout
+
+\begin_layout Standard
+The algorithm was implemented in Python (version 3), relying on the following
+ external modules:
+\end_layout
+
+\begin_layout Itemize
+graph_tool, for graph representation and manipulation
+\end_layout
+
+\begin_layout Itemize
+memory_profiler, to collect memory usage statistics
+\end_layout
+
+\begin_layout Section*
+Algorithm
+\end_layout
+
+\begin_layout Standard
+This implementation is meant to be as close as possible to Goldberg's general
+ push-rebel algorithm, without employing elaborate optimization.
+ It uses a simple stack structure to keep track of active nodes, hence being
+ able to choose a suitable operation in In the following section we show
+ and discuss the most significant parts.
+\end_layout
+
+\begin_layout Subsection*
+Push / relabel routines
+\end_layout
+
+\begin_layout Standard
+The implementation is very straightforward, and naturally leads to a complexity
+ of 
+\begin_inset Formula $O\left(1\right)$
+\end_inset
+
+ for pushes and of 
+\begin_inset Formula $O\left(E\right)$
+\end_inset
+
+ for relabel operations (since a relabel might result in visiting all edges
+ in the worst case).
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Python,basicstyle={\scriptsize},showstringspaces=false,captionpos=b"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def push(edge, excess, capacity, preflow, reverse_edges):
+\end_layout
+
+\begin_layout Plain Layout
+
+    origin = edge.source()
+\end_layout
+
+\begin_layout Plain Layout
+
+    dest = edge.target()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    delta = min(excess[origin], capacity[edge] - preflow[edge])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    preflow[edge] = preflow[edge] + delta
+\end_layout
+
+\begin_layout Plain Layout
+
+    rev = reverse_edges[edge]
+\end_layout
+
+\begin_layout Plain Layout
+
+    preflow[rev] = preflow[rev] - delta
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    excess[origin] = excess[origin] - delta
+\end_layout
+
+\begin_layout Plain Layout
+
+    excess[dest] = excess[dest] + delta
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+def relabel(vertex, distance, capacity, preflow):
+\end_layout
+
+\begin_layout Plain Layout
+
+    suitable_edges = filter(
+\end_layout
+
+\begin_layout Plain Layout
+
+        lambda edge : capacity[edge] - preflow[edge] > 0, vertex.out_edges()
+\end_layout
+
+\begin_layout Plain Layout
+
+    )
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    dists = map(
+\end_layout
+
+\begin_layout Plain Layout
+
+        lambda edge : distance[edge.target()], suitable_edges
+\end_layout
+
+\begin_layout Plain Layout
+
+    )
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    new_d = min(dists) + 1
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    distance[vertex] = new_d
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Initialization
+\end_layout
+
+\begin_layout Standard
+The algorithm begins by adding reverse arcs to the graph and by initializing
+ the necessary structures to store run variables (temporary preflow, distance
+ and excess) along with a map to easily access the reverse of an edge in
+ constant time.
+ Then a stack is created to provide fast access to active nodes, together
+ with another structure to keep track of the activeness of each vertex.
+\end_layout
+
+\begin_layout Standard
+The only non constant-time operation here is the edge creation, which takes
+ 
+\begin_inset Formula $O\left(E\right)$
+\end_inset
+
+ time.
+ Moreover, due to edge iterator issues, a further list of vertex couples
+ has to be kept.
+ Such list has length 
+\begin_inset Formula $E$
+\end_inset
+
+.
+ This could be avoided by employing a lazy initialization mechanism, but
+ this direction has not been taken for the sake of code clarity.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Python,basicstyle={\scriptsize},showstringspaces=false,captionpos=b,aboveskip={\smallskipamount},belowskip=20bp"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def stack_push_relabel(graph, source, target, capacity):
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Initializing data maps
+\end_layout
+
+\begin_layout Plain Layout
+
+    reverse_edges, preflow, distance, excess = helper.create_maps(graph,
+ capacity)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Initializing stack to keep active node
+\end_layout
+
+\begin_layout Plain Layout
+
+    actives = structure.Stack()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Initializing active map
+\end_layout
+
+\begin_layout Plain Layout
+
+    is_active = graph.new_vertex_property("bool")
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    #    ...
+    #
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+def _create_residual_edges(graph, capacity):
+\end_layout
+
+\begin_layout Plain Layout
+
+    #    ...
+    #
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    newlist = []
+\end_layout
+
+\begin_layout Plain Layout
+
+    for edge in graph.edges():
+\end_layout
+
+\begin_layout Plain Layout
+
+        newlist.append((edge, edge.target(), edge.source()))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    for entry in newlist:
+\end_layout
+
+\begin_layout Plain Layout
+
+        debug.info("Adding residual edge from {} to {}".format(entry[1], entry[2])
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+        new = graph.add_edge(entry[1], entry[2])
+\end_layout
+
+\begin_layout Plain Layout
+
+        capacity[new] = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+        reverse_edges[entry[0]] = new
+\end_layout
+
+\begin_layout Plain Layout
+
+        reverse_edges[new] = edge
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    return reverse_edges
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The algorithm then proceeds with the usual push-relabel initialization,
+ with the only precaution of adding activated nodes to the active list during
+ the initial saturating pushes.
+ Vertices first and then edges are iterated, hence time complexity will
+ be 
+\begin_inset Formula $O\left(V+E\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Python,basicstyle={\scriptsize},showstringspaces=false"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+    #    ...
+    #
+\end_layout
+
+\begin_layout Plain Layout
+
+    # continues from push_relabel function
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Initializing distance, excess and active property
+\end_layout
+
+\begin_layout Plain Layout
+
+    for v in graph.vertices():
+\end_layout
+
+\begin_layout Plain Layout
+
+        distance[v] = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+        excess[v] = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+        is_active[v] = False
+\end_layout
+
+\begin_layout Plain Layout
+
+    distance[source] = graph.num_vertices()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Initializing preflow
+\end_layout
+
+\begin_layout Plain Layout
+
+    for edge in graph.edges():
+\end_layout
+
+\begin_layout Plain Layout
+
+        preflow[edge] = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Saturate edges outgoing from source
+\end_layout
+
+\begin_layout Plain Layout
+
+    for s_out in source.out_edges():
+\end_layout
+
+\begin_layout Plain Layout
+
+        cap = capacity[s_out]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+        # If capacity is 0, nothing to push
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Probably an added residual arc
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Skip cycle just for optimization
+\end_layout
+
+\begin_layout Plain Layout
+
+        if cap == 0:
+\end_layout
+
+\begin_layout Plain Layout
+
+            continue
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+        preflow[s_out] = cap
+\end_layout
+
+\begin_layout Plain Layout
+
+        preflow[reverse_edges[s_out]] = - cap
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+        excess[s_out.target()] = excess[s_out.target()] + cap
+\end_layout
+
+\begin_layout Plain Layout
+
+        excess[source] = excess[source] - cap
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Since node has become active, add it to active stack
+\end_layout
+
+\begin_layout Plain Layout
+
+        active = s_out.target()
+\end_layout
+
+\begin_layout Plain Layout
+
+        if active != target and is_active[active] == False:
+\end_layout
+
+\begin_layout Plain Layout
+
+            actives.push(active)
+\end_layout
+
+\begin_layout Plain Layout
+
+            is_active[active] = True
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Main loop
+\end_layout
+
+\begin_layout Standard
+This is were the sequence of push and relabel actions that give name to
+ the algorithm takes place.
+ Resorting to literature, it is possible to prove that the number of such
+ operations is 
+\begin_inset Formula $O\left(V^{2}E\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+At each step of the cycle, the last activated node is popped from the stack.
+ All possible pushes from the selected node are performed, adding any target
+ node that becomes active to the active set.
+ Lastly the selected node is relabeled if it is still active.
+\end_layout
+
+\begin_layout Standard
+Each time a vertex is selected for the main cycle, its outgoing edge list
+ is possibly scanned twice, one time for pushing and one for relabeling.
+ Since the maximum number of relabels for a vertex is 
+\begin_inset Formula $2V-1$
+\end_inset
+
+
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+CITE ME
+\end_layout
+
+\end_inset
+
+, the maximum number of scans for each vertex is 
+\begin_inset Formula $4V-1$
+\end_inset
+
+ (one for each relabeling, one for the pushes before each relabeling and
+ one for the pushes after the last relabeling).
+ Since our push implementation runs in constant time, it is clear that the
+ time spent to process each node 
+\begin_inset Formula $v$
+\end_inset
+
+ is 
+\begin_inset Formula $O\left(V\times deg_{out}\left(v\right)\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Python,basicstyle={\scriptsize},showstringspaces=false"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+    #    ...
+    #
+\end_layout
+
+\begin_layout Plain Layout
+
+    # continues from push_relabel function
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    cur_v = actives.pop()
+\end_layout
+
+\begin_layout Plain Layout
+
+    while cur_v:
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Look for admissible edges
+\end_layout
+
+\begin_layout Plain Layout
+
+        for out_e in cur_v.out_edges():
+\end_layout
+
+\begin_layout Plain Layout
+
+            # If admissible, push flow
+\end_layout
+
+\begin_layout Plain Layout
+
+            if (distance[cur_v] > distance[out_e.target()]
+\end_layout
+
+\begin_layout Plain Layout
+
+                and capacity[out_e] - preflow[out_e] > 0):
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                helper.push(out_e, excess, capacity, preflow, reverse_edges)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                active = out_e.target()
+\end_layout
+
+\begin_layout Plain Layout
+
+                if active != target and is_active[active] == False:
+\end_layout
+
+\begin_layout Plain Layout
+
+                    actives.push(active)
+\end_layout
+
+\begin_layout Plain Layout
+
+                    is_active[active] = True
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                # Node not active anymore
+\end_layout
+
+\begin_layout Plain Layout
+
+                if (excess[cur_v] <= 0):
+\end_layout
+
+\begin_layout Plain Layout
+
+                    is_active[active] = False
+\end_layout
+
+\begin_layout Plain Layout
+
+                    break
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+        # No more admissible edges
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Relabel if still active
+\end_layout
+
+\begin_layout Plain Layout
+
+        if (excess[cur_v] > 0):
+\end_layout
+
+\begin_layout Plain Layout
+
+            helper.relabel(cur_v, distance, capacity, preflow)
+\end_layout
+
+\begin_layout Plain Layout
+
+            actives.push(cur_v)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+        cur_v = actives.pop()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    return preflow
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
