@@ -117,7 +117,8 @@ The algorithm was implemented in Python (version 3), relying on the following
 \end_layout
 
 \begin_layout Itemize
-graph_tool, for graph representation and manipulation
+graph_tool, for graph representation and manipulation; this module relies
+ directly on the Boost Graph Library
 \end_layout
 
 \begin_layout Itemize
@@ -869,6 +870,146 @@ status open
 \begin_layout Plain Layout
 
     return preflow
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+Benchmark
+\end_layout
+
+\begin_layout Standard
+The performance of our implementation has been empirically measured both
+ in terms of running time and memory consumption.
+ In the following section benchmark results are displayed, and compared
+ with the ones obtained buy running the same tests on the Boost Graph Library
+ implementation of the push-relabel algorithm.
+\end_layout
+
+\begin_layout Standard
+All tests have been executed on a Celeron-based machine running a 64-bit
+ GNU/Linux system.
+\end_layout
+
+\begin_layout Section*
+Execution time
+\end_layout
+
+\begin_layout Standard
+The observed results empirically confirm that the execution time of our
+ implementation is polynomial and grows superlinearly with the number of
+ vertices and linearly with the number of edges.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename time_vertices.svg
+	lyxscale 25
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename time_edges.svg
+	lyxscale 25
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Execution time plots
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Memory usage
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+Biased due to completeness of tested graphs
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename mem_vertices.svg
+	lyxscale 25
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename mem_edges.svg
+	lyxscale 25
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Memory usage plots
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \end_inset
