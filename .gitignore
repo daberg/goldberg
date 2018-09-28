@@ -2,3 +2,5 @@ __pycache__/
 *.egg-info/
 material/
 benchmark/results
+*.lyx#
+*.lyx~
