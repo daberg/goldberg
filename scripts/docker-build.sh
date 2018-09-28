@@ -7,9 +7,5 @@ if echo $PACKAGEPATH | grep -q scripts; then
     PACKAGEPATH=`dirname $PACKAGEPATH`
 fi
 
-# If docker image not present, build it
-if ! docker images | grep -q "goldberg-env"; then
-    ${PACKAGEPATH}/scripts/docker-build.sh
-fi
-
+echo "Building docker image for goldberg package"
 docker build -t goldberg-env "$PACKAGEPATH"
