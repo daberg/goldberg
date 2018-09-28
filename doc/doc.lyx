@@ -98,8 +98,8 @@ Abstract
 
 \begin_layout Standard
 We hereby analyze the features of our implementation of Goldberg's push-relabel
- algorithm and, leaning on benchmark results, show that the performance
- of such implementation is essentially consistent with the theoretical results
+ algorithm and, utilizing benchmark results, show that the performance of
+ such implementation is essentially consistent with the theoretical results
  from the literature.
 \end_layout
 
@@ -131,10 +131,9 @@ Algorithm
 
 \begin_layout Standard
 This implementation is meant to be as close as possible to Goldberg's general
- push-rebel algorithm, without employing elaborate optimization.
- It uses a simple stack structure to keep track of active nodes, hence being
- able to choose a suitable operation in In the following section we show
- and discuss the most significant parts.
+ push-relabel algorithm, without employing elaborate optimization.
+ It uses a simple stack structure to keep track of active nodes.
+ In the following section we show and discuss its most significant parts.
 \end_layout
 
 \begin_layout Subsection*
@@ -293,8 +292,8 @@ The algorithm begins by adding reverse arcs to the graph and by initializing
  the necessary structures to store run variables (temporary preflow, distance
  and excess) along with a map to easily access the reverse of an edge in
  constant time.
- Then a stack is created to provide fast access to active nodes, together
- with another structure to keep track of the activeness of each vertex.
+ Then a stack is created to provide fast access to active nodes, as well
+ as another structure to keep track of the activeness of each vertex.
 \end_layout
 
 \begin_layout Standard
@@ -306,7 +305,7 @@ The only non constant-time operation here is the edge creation, which takes
  time.
  Moreover, due to edge iterator issues, a further list of vertex couples
  has to be kept.
- Such list has length 
+ Said list has length 
 \begin_inset Formula $E$
 \end_inset
 
@@ -655,8 +654,8 @@ Main loop
 \end_layout
 
 \begin_layout Standard
-This is were the sequence of push and relabel actions that give name to
- the algorithm takes place.
+This is were the sequence of push and relabel actions that give the algorithm
+ its name takes place.
 \end_layout
 
 \begin_layout Standard
@@ -698,7 +697,7 @@ To analyze complexity, we observe that each time a vertex is selected for
 \begin_inset Formula $O\left(V^{2}E\right)$
 \end_inset
 
- itself, which coincides with the global time complexity of our implementation
+ as well, which coincides with the global time complexity of our implementation,
  since it dominates the initialization complexity.
 \begin_inset Note Comment
 status open
@@ -884,8 +883,8 @@ Benchmark
 \begin_layout Standard
 The performance of our implementation has been empirically measured both
  in terms of running time and memory consumption.
- In the following section benchmark results are displayed, and compared
- with the ones obtained buy running the same tests on the Boost Graph Library
+ In the following section, benchmark results are displayed and compared
+ with those obtained by running the same tests on the Boost Graph Library
  implementation of the push-relabel algorithm.
 \end_layout
 
