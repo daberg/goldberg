@@ -141,8 +141,8 @@ Push / relabel routines
 \end_layout
 
 \begin_layout Standard
-The implementation is very straightforward, and naturally leads to a complexity
- of 
+The implementation here is very straightforward, and naturally leads to
+ a complexity of 
 \begin_inset Formula $O\left(1\right)$
 \end_inset
 
@@ -656,12 +656,6 @@ Main loop
 \begin_layout Standard
 This is were the sequence of push and relabel actions that give name to
  the algorithm takes place.
- Resorting to literature, it is possible to prove that the number of such
- operations is 
-\begin_inset Formula $O\left(V^{2}E\right)$
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
@@ -672,13 +666,39 @@ At each step of the cycle, the last activated node is popped from the stack.
 \end_layout
 
 \begin_layout Standard
-Each time a vertex is selected for the main cycle, its outgoing edge list
- is possibly scanned twice, one time for pushing and one for relabeling.
+To analyze complexity, we observe that each time a vertex is selected for
+ the main cycle, its outgoing edge list is possibly scanned twice, one time
+ for pushing and one for relabeling.
  Since the maximum number of relabels for a vertex is 
 \begin_inset Formula $2V-1$
 \end_inset
 
+, the maximum number of scans for each vertex is 
+\begin_inset Formula $4V-1$
+\end_inset
 
+ (one for each relabeling, one for the pushes before each relabeling and
+ one for the pushes after the last relabeling).
+ Hence the global time spent to process each node 
+\begin_inset Formula $v$
+\end_inset
+
+ is 
+\begin_inset Formula $O\left(V\times deg_{out}\left(v\right)\right)+O\left(1\right)\times n_{pushes}(v)$
+\end_inset
+
+.
+ Summing over all vertices, and recalling that the global number of pushes
+ from all nodes is 
+\begin_inset Formula $O\left(V^{2}E\right)$
+\end_inset
+
+, we find that the global execution time of the main loop is 
+\begin_inset Formula $O\left(V^{2}E\right)$
+\end_inset
+
+ itself, which coincides with the global time complexity of our implementation
+ since it dominates the initialization complexity.
 \begin_inset Note Comment
 status open
 
@@ -688,22 +708,7 @@ CITE ME
 
 \end_inset
 
-, the maximum number of scans for each vertex is 
-\begin_inset Formula $4V-1$
-\end_inset
 
- (one for each relabeling, one for the pushes before each relabeling and
- one for the pushes after the last relabeling).
- Since our push implementation runs in constant time, it is clear that the
- time spent to process each node 
-\begin_inset Formula $v$
-\end_inset
-
- is 
-\begin_inset Formula $O\left(V\times deg_{out}\left(v\right)\right)$
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
