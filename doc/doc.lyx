@@ -954,6 +954,12 @@ Memory usage
 \end_layout
 
 \begin_layout Standard
+The empirical results show that memory usage indeed grows linearly with
+ the number of edges, since our implementation always creates 
+\begin_inset Formula $E$
+\end_inset
+
+ reverse arcs to perform its computation.
 \begin_inset Note Comment
 status open
 
@@ -975,17 +981,6 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename mem_vertices.svg
-	lyxscale 25
-	scale 25
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
 	filename mem_edges.svg
 	lyxscale 25
 	scale 25
@@ -1004,10 +999,6 @@ Memory usage plots
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
