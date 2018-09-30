@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PACKAGEPATH=`pwd`
+
 # If running from scripts folder, change to parent directory
 if echo $PACKAGEPATH | grep -q scripts; then
     PACKAGEPATH=`dirname $PACKAGEPATH`

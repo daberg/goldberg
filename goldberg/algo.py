@@ -115,6 +115,8 @@ def stack_push_relabel(graph, source, target, capacity):
 
     cur_v = actives.pop()
     while cur_v:
+        debug.info("Popped node {} from stack".format(cur_v))
+        debug.info("Stack state: {}".format(str(actives)))
         debug.info_algo(graph, capacity, preflow, distance, excess)
 
         # Look for admissible edges
@@ -127,9 +129,10 @@ def stack_push_relabel(graph, source, target, capacity):
                 helper.push(out_e, excess, capacity, preflow, reverse_edges)
 
                 active = out_e.target()
-                if active != target and is_active[active] == False:
+                if active != source and active != target and is_active[active] == False:
                     actives.push(active)
                     is_active[active] = True
+                    debug.info("Pushed node {} to stack".format(active))
 
                 # Node not active anymore
                 if (excess[cur_v] <= 0):
@@ -141,6 +144,7 @@ def stack_push_relabel(graph, source, target, capacity):
         if (excess[cur_v] > 0):
             helper.relabel(cur_v, distance, capacity, preflow)
             actives.push(cur_v)
+            debug.info("Pushed node {} back to stack".format(cur_v))
 
         cur_v = actives.pop()
 
@@ -148,3 +152,26 @@ def stack_push_relabel(graph, source, target, capacity):
     debug.info_algo(graph, capacity, preflow, distance, excess)
 
     return preflow
+
+import graph_tool
+
+g = graph_tool.Graph()
+
+g.add_vertex()
+g.add_vertex()
+g.add_vertex()
+
+g.add_edge(1, 0)
+g.add_edge(2, 0)
+g.add_edge(2, 1)
+
+capacity = g.new_edge_property("int")
+
+capacity[g.edge(1, 0)] = 21
+capacity[g.edge(2, 0)] = 47
+capacity[g.edge(2, 1)] = 4
+
+flow = stack_push_relabel(g, g.vertex(2), g.vertex(1), capacity)
+
+for edge in g.edges():
+    print("Edge {}: flow={} / capacity={}".format(edge, flow[edge], capacity[edge]))

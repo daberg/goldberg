@@ -440,7 +440,7 @@ def _create_residual_edges(graph, capacity):
 
 \begin_layout Plain Layout
 
-        reverse_edges[new] = edge
+        reverse_edges[new] = entry[0]
 \end_layout
 
 \begin_layout Plain Layout
@@ -877,7 +877,7 @@ status open
 \end_layout
 
 \begin_layout Part*
-Benchmark
+Benchmarks
 \end_layout
 
 \begin_layout Standard

@@ -43,6 +43,8 @@ def push(edge, excess, capacity, preflow, reverse_edges):
     excess[dest] = excess[dest] + delta
 
     debug.info("Pushed {:f} from {} to {}".format(delta, origin, dest))
+    debug.info(" Edge {} flow raised by {}".format(edge, delta))
+    debug.info(" Edge {} flow decreased by {}".format(rev, delta))
 
 def relabel(vertex, distance, capacity, preflow):
     # There must be at least a suitable edge
@@ -81,6 +83,6 @@ def _create_residual_edges(graph, capacity):
         new = graph.add_edge(entry[1], entry[2])
         capacity[new] = 0
         reverse_edges[entry[0]] = new
-        reverse_edges[new] = edge
+        reverse_edges[new] = entry[0]
 
     return reverse_edges
