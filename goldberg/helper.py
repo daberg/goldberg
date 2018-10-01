@@ -49,17 +49,20 @@ def push(edge, excess, capacity, preflow, reverse_edges):
 def relabel(vertex, distance, capacity, preflow):
     # There must be at least a suitable edge
     suitable_edges = filter(
-        lambda edge : capacity[edge] - preflow[edge] > 0, vertex.out_edges()
+        lambda edge : capacity[edge] - preflow[edge] > 0,
+        vertex.out_edges()
     )
-
     dists = map(
-        lambda edge : distance[edge.target()], suitable_edges
+        lambda edge : distance[edge.target()],
+        suitable_edges
     )
 
     new_d = min(dists) + 1
-
     distance[vertex] = new_d
-    debug.info("Relabeled vertex {} with distance {:d}".format(vertex, new_d))
+
+    debug.info(
+        "Relabeled vertex {} with distance {:d}".format(vertex, new_d)
+    )
 
 def select_active(graph, excess, sink):
     for v in graph.vertices():

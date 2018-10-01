@@ -152,26 +152,3 @@ def stack_push_relabel(graph, source, target, capacity):
     debug.info_algo(graph, capacity, preflow, distance, excess)
 
     return preflow
-
-import graph_tool
-
-g = graph_tool.Graph()
-
-g.add_vertex()
-g.add_vertex()
-g.add_vertex()
-
-g.add_edge(1, 0)
-g.add_edge(2, 0)
-g.add_edge(2, 1)
-
-capacity = g.new_edge_property("int")
-
-capacity[g.edge(1, 0)] = 21
-capacity[g.edge(2, 0)] = 47
-capacity[g.edge(2, 1)] = 4
-
-flow = stack_push_relabel(g, g.vertex(2), g.vertex(1), capacity)
-
-for edge in g.edges():
-    print("Edge {}: flow={} / capacity={}".format(edge, flow[edge], capacity[edge]))
