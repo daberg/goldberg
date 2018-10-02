@@ -35,38 +35,16 @@ try:
                     g.num_edges()
                 )
             )
-            for v in g.vertices():
-                print(v)
-            for edge in g.edges():
-                print("Edge {}: c={}".format(edge, capacity[edge]))
 
             # Randomize source and target vertices
-            # Pick a reasonably long path between them
-            while True:
-                v1 = random.randint(0, num_vertices - 1)
-                v2 = random.randint(1, num_vertices - 1)
-                if v2 == v1:
-                    v2 = v2 - 1
+            v1 = random.randint(0, num_vertices - 1)
+            v2 = random.randint(1, num_vertices - 1)
+            if v2 == v1:
+                v2 = v2 - 1
 
-                print("Chose vertices {} and {}".format(v1, v2))
+            print("Chose vertices {} and {}".format(v1, v2))
 
-                paths_iter = graph_tool.topology.all_paths(
-                    g,
-                    v1,
-                    v2,
-                    max(2, num_vertices / 2)
-                )
-
-                try:
-                    path = max(paths_iter, key=len)
-                    break
-                except ValueError:
-                    print("No path exists between selected vertices")
-                    print("Starting again")
-
-            print("Found a path of length {:d} between selected vertices".format(len(path)))
-
-            results = goldberg.benchmark.benchmark_all(g, g.vertex(path[0]), g.vertex(path[-1]), capacity)
+            results = goldberg.benchmark.benchmark_all(g, g.vertex(v1), g.vertex(v2), capacity)
 
             # Check that results are the same
             res = results[0][1]["maxflow"]
@@ -79,7 +57,7 @@ try:
             f_res.write(
                 "[{:d}, ".format(num_vertices)
                 + "{:d}, ".format(g.num_edges())
-                + json.dumps(results) + ", {:d}]".format(len(path))
+                + json.dumps(results)
                 + '\n'
             )
 
