@@ -119,6 +119,8 @@ def stack_push_relabel(graph, source, target, capacity):
         debug.info("Stack state: {}".format(str(actives)))
         debug.info_algo(graph, capacity, preflow, distance, excess)
 
+        is_active[cur_v] = False
+
         # Look for admissible edges
         for out_e in cur_v.out_edges():
             # If admissible, push flow
@@ -136,14 +138,15 @@ def stack_push_relabel(graph, source, target, capacity):
 
                 # Node not active anymore
                 if (excess[cur_v] <= 0):
-                    is_active[active] = False
                     break
 
         # No more admissible edges
         # Relabel if still active
         if (excess[cur_v] > 0):
             helper.relabel(cur_v, distance, capacity, preflow)
-            actives.push(cur_v)
+            if not is_active[cur_v]:
+                actives.push(cur_v)
+                is_active[cur_v] = True
             debug.info("Pushed node {} back to stack".format(cur_v))
 
         cur_v = actives.pop()
