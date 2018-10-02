@@ -68,30 +68,6 @@ def benchmark_all(graph, source, target, capacity):
     _print_result(result)
     _print_separator()
 
-    ## Naive push-relabel implementation
-    #name="Naive push-relabel"
-
-    #graph = original_g.copy()
-    #capacity = graph.edge_properties["capacity"]
-
-    #flow, time, mem = profilerun(
-    #    algo.naive_push_relabel,
-    #    graph,
-    #    graph.vertex(original_g.vertex_index[source]),
-    #    graph.vertex(original_g.vertex_index[target]),
-    #    capacity
-    #)
-
-    #maxflow = sum(flow[e] for e in target.in_edges())
-
-    #result = _compose_result(maxflow, time, mem)
-    #results.append((name, result))
-
-    #print("{} run stats".format(name))
-    #print()
-    #_print_result(result)
-    #_print_separator()
-
     return results
 
 def profilerun(flownet_function, graph, source, target, capacity):
