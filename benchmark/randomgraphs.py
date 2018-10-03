@@ -26,7 +26,7 @@ f_res = open('benchmark/results/random_graph_results.dat', "w")
 f_graphs = open('benchmark/results/random_graphs.dat', "wb")
 
 try:
-    for num_vertices in range(2, 100):
+    for num_vertices in range(2, 101):
         for count in range(25):
             g, capacity = generate_random_graph(num_vertices)
             print(
@@ -58,6 +58,7 @@ try:
                 "[{:d}, ".format(num_vertices)
                 + "{:d}, ".format(g.num_edges())
                 + json.dumps(results)
+                + "]"
                 + '\n'
             )
 
