@@ -71,18 +71,24 @@ def benchmark_all(graph, source, target, capacity):
     return results
 
 def profilerun(flownet_function, graph, source, target, capacity):
-    start_mem = memory_profiler.memory_usage(lambda: None, max_usage=True)[0]
     start_time = time.time()
-
-    mem, ret = memory_profiler.memory_usage((flownet_function, [graph, source, target, capacity]), max_usage=True, retval=True)
-
+    ret = flownet_function(graph, source, target, capacity)
     end_time = time.time()
-    end_mem = mem[0]
 
     time_diff = end_time - start_time
+
+    interval = time_diff / 1000.0
+    start_mem = memory_profiler.memory_usage(lambda: None, max_usage=True)[0]
+    end_mem = memory_profiler.memory_usage(
+        (flownet_function, [graph, source, target, capacity]),
+        interval=interval,
+        timeout=time_diff,
+        max_usage=True
+    )[0]
+
     mem_diff = end_mem - start_mem
 
-    return (ret, time_diff * 1000.0, mem_diff * 1024)
+    return (ret, time_diff * 1000.0, mem_diff * 1024.0)
 
 def _compose_result(maxflow, time, memory):
     result = {
