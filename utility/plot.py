@@ -1,6 +1,5 @@
 import json
 import matplotlib.pyplot as plt
-import numpy as np
 import sys
 
 
@@ -15,40 +14,101 @@ with open(sys.argv[1], "r") as f:
     for line in f:
         entries.append(json.loads(line))
 
-v = []
-e = []
-t = {}
-m = {}
-
 for entry in entries:
     num_vertices = entry[0]
-    num_edges = (num_vertices * (num_vertices - 1)) / 2
+    num_edges = entry[1]
 
-    v.append(num_vertices)
-    e.append(num_edges)
-
-    for impl in entry[1]:
+    for impl in entry[2]:
         name = impl[0]
         time = impl[1]['time']
         mem = impl[1]['memory']
 
-        if name not in t:
-            t[name] = []
+        if name not in implementations:
+            implementations[name] = {
+                "tv" : {},
+                "te" : {},
+                "mv" : {},
+                "me" : {}
+            }
 
-        if name not in m:
-            m[name] = []
+        if num_vertices not in implementations[name]["tv"]:
+            implementations[name]["tv"][num_vertices] = []
+        implementations[name]["tv"][num_vertices].append(time)
 
-        # Use implementation name as key
-        t[name].append(time)
-        m[name].append(mem)
+        if num_edges not in implementations[name]["te"]:
+            implementations[name]["te"][num_edges] = []
+        implementations[name]["te"][num_edges].append(time)
 
-for key in t:
-    print(t[key])
+        if num_vertices not in implementations[name]["mv"]:
+            implementations[name]["mv"][num_vertices] = []
+        implementations[name]["mv"][num_vertices].append(mem)
 
-for key in t:
-    plt.plot(v, t[key])
+        if num_edges not in implementations[name]["me"]:
+            implementations[name]["me"][num_edges] = []
+        implementations[name]["me"][num_edges].append(mem)
+
+for impl in implementations:
+    for num_vertices in implementations[impl]["tv"]:
+        implementations[impl]["tv"][num_vertices] = (
+            sum(implementations[impl]["tv"][num_vertices])
+            / len(implementations[impl]["tv"][num_vertices])
+        )
+    for num_edges in implementations[impl]["te"]:
+        implementations[impl]["te"][num_edges] = (
+            sum(implementations[impl]["te"][num_edges])
+            / len(implementations[impl]["te"][num_edges])
+        )
+    for num_vertices in implementations[impl]["mv"]:
+        implementations[impl]["mv"][num_vertices] = (
+            sum(implementations[impl]["mv"][num_vertices])
+            / len(implementations[impl]["mv"][num_vertices])
+        )
+    for num_edges in implementations[impl]["me"]:
+        implementations[impl]["me"][num_edges] = (
+            sum(implementations[impl]["me"][num_edges])
+            / len(implementations[impl]["me"][num_edges])
+        )
+
+# Plot time against number of vertices
+for impl in implementations:
+    sorted_pairs = sorted(implementations[impl]["tv"].items(), key=lambda kv : kv[0])
+    x = [pair[0] for pair in sorted_pairs]
+    y = [pair[1] for pair in sorted_pairs]
+    plt.plot(x, y, "o")
+plt.legend(implementations.keys())
+plt.xlabel("Number of vertices")
+plt.ylabel("Average execution time (ms)")
 plt.show()
 
-for key in t:
-    plt.plot(e, t[key])
+# Plot time against number of edges
+for impl in implementations:
+    sorted_pairs = sorted(implementations[impl]["te"].items(), key=lambda kv : kv[0])
+    x = [pair[0] for pair in sorted_pairs]
+    y = [pair[1] for pair in sorted_pairs]
+    plt.plot(x, y, "o")
+plt.legend(implementations.keys())
+plt.xlabel("Number of edges")
+plt.ylabel("Average execution time (ms)")
+plt.show()
+
+# Plot memory against number of vertices
+for impl in implementations:
+    sorted_pairs = sorted(implementations[impl]["mv"].items(), key=lambda kv : kv[0])
+    x = [pair[0] for pair in sorted_pairs]
+    y = [pair[1] for pair in sorted_pairs]
+    plt.plot(x, y, "o")
+plt.legend(implementations.keys())
+plt.xlabel("Number of vertices")
+plt.ylabel("Average memory usage (mb)")
+plt.show()
+
+# Plot memory against number of edges
+for impl in implementations:
+    sorted_pairs = sorted(implementations[impl]["me"].items(), key=lambda kv : kv[0])
+    x = [pair[0] for pair in sorted_pairs]
+    y = [pair[1] for pair in sorted_pairs]
+    plt.plot(x, y, "o")
+plt.legend(implementations.keys())
+plt.xlabel("Number of edges")
+plt.ylabel("Average memory usage (mb)")
 plt.show()
