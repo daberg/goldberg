@@ -290,10 +290,10 @@ Initialization
 \begin_layout Standard
 The algorithm begins by adding reverse arcs to the graph and by initializing
  the necessary structures to store run variables (temporary preflow, distance
- and excess) along with a map to easily access the reverse of an edge in
+ and excess), as well as a map to easily access the reverse of an edge in
  constant time.
- Then a stack is created to provide fast access to active nodes, as well
- as another structure to keep track of the activeness of each vertex.
+ Then a simple stack is created to store active nodes, together with another
+ map to enhance the stack with fast vertex membership test.
 \end_layout
 
 \begin_layout Standard
@@ -415,12 +415,6 @@ def _create_residual_edges(graph, capacity):
 \begin_layout Plain Layout
 
     for entry in newlist:
-\end_layout
-
-\begin_layout Plain Layout
-
-        debug.info("Adding residual edge from {} to {}".format(entry[1], entry[2])
-)
 \end_layout
 
 \begin_layout Plain Layout
@@ -744,6 +738,15 @@ status open
 
 \begin_layout Plain Layout
 
+        is_active[cur_v] = False
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
         # Look for admissible edges
 \end_layout
 
@@ -769,10 +772,6 @@ status open
 
 \begin_layout Plain Layout
 
-\end_layout
-
-\begin_layout Plain Layout
-
                 helper.push(out_e, excess, capacity, preflow, reverse_edges)
 \end_layout
 
@@ -787,7 +786,8 @@ status open
 
 \begin_layout Plain Layout
 
-                if active != target and is_active[active] == False:
+                if active != source and active != target and is_active[active]
+ == False:
 \end_layout
 
 \begin_layout Plain Layout
@@ -812,11 +812,6 @@ status open
 \begin_layout Plain Layout
 
                 if (excess[cur_v] <= 0):
-\end_layout
-
-\begin_layout Plain Layout
-
-                    is_active[active] = False
 \end_layout
 
 \begin_layout Plain Layout
@@ -850,7 +845,17 @@ status open
 
 \begin_layout Plain Layout
 
-            actives.push(cur_v)
+            if not is_active[cur_v]:
+\end_layout
+
+\begin_layout Plain Layout
+
+                actives.push(cur_v)
+\end_layout
+
+\begin_layout Plain Layout
+
+                is_active[cur_v] = True
 \end_layout
 
 \begin_layout Plain Layout
