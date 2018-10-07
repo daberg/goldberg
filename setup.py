@@ -9,5 +9,5 @@ setup(
     description="Goldberg's push-relabel algorithm implementation and benchmark",
     name='goldberg',
     packages=['goldberg'],
-    version='0.1'
+    version='1.0'
 )
