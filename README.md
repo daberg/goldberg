@@ -8,7 +8,7 @@ Politecnico di Milano
 
 ## Browsing the repository
 
-[**Presentation and discussion of results**](/doc.pdf)
+[**Presentation and discussion of results**](/results.pdf)
 
 [Python package source code](/goldberg)
 

@@ -4,7 +4,7 @@
 \begin_header
 \save_transient_properties true
 \origin unavailable
-\textclass article
+\textclass paper
 \begin_preamble
 \usepackage{indentfirst}
 \end_preamble
@@ -88,19 +88,32 @@ Goldberg's algorithm implementation and benchmarking in Python
 Davide Bergamaschi
 \end_layout
 
-\begin_layout Date
-2018
-\end_layout
-
-\begin_layout Part*
-Abstract
+\begin_layout Institution
+Politecnico di Milano
 \end_layout
 
 \begin_layout Standard
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Abstract
+\noindent
+
+\size normal
 We hereby analyze the features of our implementation of Goldberg's push-relabel
  algorithm and, utilizing benchmark results, show that the performance of
  such implementation is essentially consistent with the theoretical results
  from the literature.
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Part*
@@ -112,17 +125,40 @@ Technology
 \end_layout
 
 \begin_layout Standard
-The algorithm was implemented in Python (version 3), relying on the following
- external modules:
+The algorithm was implemented in Python (version 3).
+ The graph-tool
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "key-1"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-graph_tool, for graph representation and manipulation; this module relies
- directly on the Boost Graph Library
+\end_inset
+
+ external module (which relies directly on the Boost Graph Library
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "key-2"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-memory_profiler, to collect memory usage statistics
+\end_inset
+
+) has been used for graph representation and manipulation.
 \end_layout
 
 \begin_layout Section*
@@ -134,6 +170,15 @@ This implementation is meant to be as close as possible to Goldberg's general
  push-relabel algorithm, without employing elaborate optimization.
  It uses a simple stack structure to keep track of active nodes.
  In the following section we show and discuss its most significant parts.
+ We also show that its time complexity is 
+\begin_inset Formula $O\left(V^{2}E\right)$
+\end_inset
+
+ and its space complexity 
+\begin_inset Formula $O\text{\left(V+E\right)}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection*
@@ -303,15 +348,26 @@ The only non constant-time operation here is the edge creation, which takes
 \end_inset
 
  time.
- Moreover, due to edge iterator issues, a further list of vertex couples
- has to be kept.
- Said list has length 
+\end_layout
+
+\begin_layout Standard
+For what concerns memory, 
 \begin_inset Formula $E$
 \end_inset
 
-.
+ residual edges have to be created, along with maps over all edges and vertices,
+ hence leading to a 
+\begin_inset Formula $O\left(V+E\right)$
+\end_inset
+
+ space complexity.
+ Moreover, due to edge iterator issues, a further list of length 
+\begin_inset Formula $E$
+\end_inset
+
+ has to be temporarily created.
  This could be avoided by employing a lazy initialization mechanism, but
- this direction has not been taken for the sake of code clarity.
+ the overall space complexity would remain the same.
 \end_layout
 
 \begin_layout Standard
@@ -650,59 +706,10 @@ Main loop
 \begin_layout Standard
 This is were the sequence of push and relabel actions that give the algorithm
  its name takes place.
-\end_layout
-
-\begin_layout Standard
-At each step of the cycle, the last activated node is popped from the stack.
+ At each step of the cycle, the last activated node is popped from the stack.
  All possible pushes from the selected node are performed, adding any target
  node that becomes active to the active set.
  Lastly the selected node is relabeled if it is still active.
-\end_layout
-
-\begin_layout Standard
-To analyze complexity, we observe that each time a vertex is selected for
- the main cycle, its outgoing edge list is possibly scanned twice, one time
- for pushing and one for relabeling.
- Since the maximum number of relabels for a vertex is 
-\begin_inset Formula $2V-1$
-\end_inset
-
-, the maximum number of scans for each vertex is 
-\begin_inset Formula $4V-1$
-\end_inset
-
- (one for each relabeling, one for the pushes before each relabeling and
- one for the pushes after the last relabeling).
- Hence the global time spent to process each node 
-\begin_inset Formula $v$
-\end_inset
-
- is 
-\begin_inset Formula $O\left(V\times deg_{out}\left(v\right)\right)+O\left(1\right)\times n_{pushes}(v)$
-\end_inset
-
-.
- Summing over all vertices, and recalling that the global number of pushes
- from all nodes is 
-\begin_inset Formula $O\left(V^{2}E\right)$
-\end_inset
-
-, we find that the global execution time of the main loop is 
-\begin_inset Formula $O\left(V^{2}E\right)$
-\end_inset
-
- as well, which coincides with the global time complexity of our implementation,
- since it dominates the initialization complexity.
-\begin_inset Note Comment
-status open
-
-\begin_layout Plain Layout
-CITE ME
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -881,25 +888,104 @@ status open
 
 \end_layout
 
+\begin_layout Standard
+To analyze time complexity, we observe that each time a vertex is selected
+ for the main cycle, its outgoing edge list is possibly scanned twice, one
+ time for pushing and one for relabeling.
+ Since the maximum number of relabels for a vertex is 
+\begin_inset Formula $2V-1$
+\end_inset
+
+, the maximum number of scans for each vertex is 
+\begin_inset Formula $4V-1$
+\end_inset
+
+ (one for each relabeling, one for the pushes before each relabeling and
+ one for the pushes after the last relabeling).
+ Hence the global time spent to process each node 
+\begin_inset Formula $v$
+\end_inset
+
+ is 
+\begin_inset Formula $O\left(V\times deg_{out}\left(v\right)\right)+O\left(1\right)\times n_{pushes}(v)$
+\end_inset
+
+.
+ Summing over all vertices, and recalling that the global number of pushes
+ from all nodes is 
+\begin_inset Formula $O\left(V^{2}E\right)$
+\end_inset
+
+, we find that the global execution time of the main loop is 
+\begin_inset Formula $O\left(V^{2}E\right)$
+\end_inset
+
+ as well, which coincides with the global time complexity of our implementation,
+ since it dominates the initialization complexity.
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "key-3"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Memory-wise, the stack is the only growing structure in this part of the
+ program, but it never gets to hold more than 
+\begin_inset Formula $V$
+\end_inset
+
+ vertices.
+ Hence space complexity here is dominated by the initialization.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Part*
 Benchmarks
 \end_layout
 
-\begin_layout Standard
-The performance of our implementation has been empirically measured both
- in terms of running time and memory consumption.
- In the following section, benchmark results are displayed and compared
- with those obtained by running the same tests on the Boost Graph Library
- implementation of the push-relabel algorithm.
+\begin_layout Section*
+Description
 \end_layout
 
 \begin_layout Standard
-All tests have been executed on a Celeron-based machine running a 64-bit
- GNU/Linux system.
+The execution time of our implementation has been measured and benchmarked
+ against the Boost Graph Library implementation of the push-relabel algorithm.
+\end_layout
+
+\begin_layout Standard
+The test data is composed by 23400 randomly generated graphs, having from
+ 2 to 40 vertices (600 samples for every number of vertices) and random
+ number of outgoing edges from each node (between 1 and the number of vertices
+ of the graph).
+ For each test graph, each implementation has been run once between two
+ randomly selected vertices.
+\end_layout
+
+\begin_layout Standard
+All tests have been conducted in a 64-bit GNU/Linux environment running
+ on a Pentium J3710 machine.
 \end_layout
 
 \begin_layout Section*
-Execution time
+Results
 \end_layout
 
 \begin_layout Standard
@@ -916,21 +1002,12 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
 	filename time_vertices.svg
 	lyxscale 25
-	scale 25
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename time_edges.svg
-	lyxscale 25
-	scale 25
+	scale 30
+	BoundingBox 300bp 0bp 2023bp 866bp
 
 \end_inset
 
@@ -941,35 +1018,12 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Execution time plots
+Average execution time against number of vertices
 \end_layout
 
 \end_inset
 
 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-Memory usage
-\end_layout
-
-\begin_layout Standard
-The empirical results show that memory usage indeed grows linearly with
- the number of edges, since our implementation always creates 
-\begin_inset Formula $E$
-\end_inset
-
- reverse arcs to perform its computation.
-\begin_inset Note Comment
-status open
-
-\begin_layout Plain Layout
-Biased due to completeness of tested graphs
 \end_layout
 
 \end_inset
@@ -985,10 +1039,12 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
-	filename mem_edges.svg
+	filename time_edges.svg
 	lyxscale 25
-	scale 25
+	scale 30
+	BoundingBox 300bp 0bp 2023bp 866bp
 
 \end_inset
 
@@ -999,7 +1055,7 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Memory usage plots
+Average execution time against number of edges
 \end_layout
 
 \end_inset
@@ -1010,6 +1066,95 @@ Memory usage plots
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+It is evident that BGL implementation rapidly outperforms ours.
+ This is partially because BGL boasts a more optimized implementation of
+ the algorithm (theoretical time complexity 
+\begin_inset Formula $O\left(V^{3}\right)$
+\end_inset
+
+)
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "key-4"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+, but also because of the speedup of compiled C++ with respect to interpreted
+ Python code.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "1"
+key "key-1"
+literal "false"
+
+\end_inset
+
+Tiago P.
+ Peixoto, “The graph-tool python library”, figshare.
+ (2014) DOI: 10.6084/m9.figshare.1164194
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "2"
+key "key-2"
+literal "false"
+
+\end_inset
+
+https://www.boost.org
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "3"
+key "key-3"
+literal "false"
+
+\end_inset
+
+Goldberg, A V; Tarjan, R E (1986).
+ "A new approach to the maximum flow problem".
+ Proceedings of the eighteenth annual ACM symposium on Theory of computing
+ - STOC '86.
+ p.
+ 136.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "4"
+key "key-4"
+literal "false"
+
+\end_inset
+
+https://www.boost.org/doc/libs/1_68_0/libs/graph/doc/push_relabel_max_flow.html
 \end_layout
 
 \end_body
