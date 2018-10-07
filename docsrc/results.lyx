@@ -182,6 +182,8 @@ This implementation is meant to be as close as possible to Goldberg's general
 \end_layout
 
 \begin_layout Subsection*
+
+\size small
 Push / relabel routines
 \end_layout
 
@@ -329,6 +331,8 @@ def relabel(vertex, distance, capacity, preflow):
 \end_layout
 
 \begin_layout Subsection*
+
+\size small
 Initialization
 \end_layout
 
@@ -700,6 +704,8 @@ status open
 \end_layout
 
 \begin_layout Subsection*
+
+\size small
 Main loop
 \end_layout
 
