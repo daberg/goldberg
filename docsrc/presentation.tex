@@ -1,0 +1,263 @@
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \usetheme{default}
+  \usecolortheme{default}
+  \usefonttheme{default}
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{codeblue}{rgb}{0,0,0.5}
+\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codeorange}{rgb}{0.9,0.6,0.1}
+
+\title{Goldberg's algorithm implementation and benchmarking in Python}
+\author{Davide Bergamaschi}
+\institute{Politecnico di Milano}
+\date{2018}
+
+\begin{document}
+
+\lstset{
+    language=Python,
+    basicstyle=\tiny\sffamily,
+    keywordstyle=\color{codeblue},
+    emph={push,relabel,stack_push_relabel,_create_residual_edges},
+    emphstyle=\bf\color{codered},
+    stringstyle=\color{codegreen}
+}
+
+\newenvironment{sidecomment}{\small\color{codeorange}}{}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Index}
+  \tableofcontents
+\end{frame}
+
+%%% Algorithm analysis section %%%
+\section{Algorithm analysis}
+
+%% Subsection template
+%\subsection{PARTNAME}
+%\begin{frame}[fragile]{PARTNAME}
+%    \begin{columns}[T]
+%        \begin{column}{0.50\textwidth}
+%            \begin{lstlisting}
+%% Listing
+%            \end{lstlisting}
+%        \end{column}
+%
+%        \begin{column}{0.50\textwidth}
+%            \begin{sidecomment}
+%            % Comments
+%            \end{sidecomment}
+%        \end{column}
+%    \end{columns}
+%% Final notes
+%\end{frame}
+
+\subsection{Push operation}
+\begin{frame}[fragile]{Push operation}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+def push(edge, excess, capacity, preflow, reverse_edges):
+    origin = edge.source()
+    dest = edge.target()
+
+    delta = min(
+        excess[origin],
+        capacity[edge] - preflow[edge]
+    )
+
+    preflow[edge] = preflow[edge] + delta
+    rev = reverse_edges[edge]
+    preflow[rev] = preflow[rev] - delta
+
+    excess[origin] = excess[origin] - delta
+    excess[dest] = excess[dest] + delta
+            \end{lstlisting}
+        \end{column}
+
+        \begin{column}{0.50\textwidth}
+            \begin{sidecomment}
+                \pause
+                \vskip 38bp
+                Compute $\Delta$
+
+                \pause
+                \vskip 22bp
+                Update preflow
+
+                \pause
+                \vskip 14bp
+                Update excess
+            \end{sidecomment}
+        \end{column}
+    \end{columns}
+
+    \pause
+    \vspace*{\fill}
+    Time complexity: $O(1)$
+\end{frame}
+
+\subsection{Relabel operation}
+\begin{frame}[fragile]{Relabel operation}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+def relabel(vertex, distance, capacity, preflow):
+    suitable_edges = filter(
+        lambda edge : capacity[edge] - preflow[edge] > 0,
+        vertex.out_edges()
+    )
+
+    dists = map(
+        lambda edge : distance[edge.target()],
+        suitable_edges
+    )
+
+    new_d = min(dists) + 1
+
+    distance[vertex] = new_d
+            \end{lstlisting}
+        \end{column}
+
+        \begin{column}{0.50\textwidth}
+            \begin{sidecomment}
+                \pause
+                \vskip 33bp
+                Find non-saturated edges
+
+                \pause
+                \vskip 23bp
+                Find minimum distance among corresponding vertices and relabel accordingly
+            \end{sidecomment}
+        \end{column}
+    \end{columns}
+
+    \pause
+    \vspace*{\fill}
+    May scan all edges
+    \\Time complexity: $O(E)$
+\end{frame}
+
+\subsection{Initialization}
+\begin{frame}[fragile]{Initialization}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+def _create_residual_edges(graph, capacity):
+    reverse_edges = graph.new_edge_property("object")
+
+    newlist = []
+    for edge in graph.edges():
+        newlist.append((edge, edge.target(), edge.source()))
+
+    for entry in newlist:
+        new = graph.add_edge(entry[1], entry[2])
+        capacity[new] = 0
+        reverse_edges[entry[0]] = new
+        reverse_edges[new] = entry[0]
+
+    return reverse_edges
+
+def stack_push_relabel(graph, source, target, capacity):
+    reverse_edges, preflow, distance, excess = helper.create_maps(graph, capacity)
+
+    actives = structure.Stack()
+
+    #    continues...    #
+            \end{lstlisting}
+        \end{column}
+
+        \begin{column}{0.50\textwidth}
+            \begin{sidecomment}
+                \pause
+                \vskip 75bp
+                Add reverse edges to graph
+
+                \pause
+                \vskip 40bp
+                Create run maps (calls above func.)
+                \\Initialize active stack
+            \end{sidecomment}
+        \end{column}
+    \end{columns}
+
+    \pause
+    \vspace*{\fill}
+    All edges are scanned, E reverse edges are created along with maps
+    \\Time complexity: $O(E)$, space complexity: $O(V+E)$
+\end{frame}
+
+\section{Introduction}
+
+\subsection{Initialization}
+\begin{frame}[fragile]{Initialization}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+    # ...continues from push_relabel function
+
+    for v in graph.vertices():
+        distance[v] = 0
+        excess[v] = 0
+        is_active[v] = False
+    distance[source] = graph.num_vertices()
+
+    for edge in graph.edges():
+        preflow[edge] = 0
+
+    for s_out in source.out_edges():
+        cap = capacity[s_out]
+
+        preflow[s_out] = cap
+        preflow[reverse_edges[s_out]] = - cap
+
+        excess[s_out.target()] = excess[s_out.target()] + cap
+        excess[source] = excess[source] - cap
+
+        active = s_out.target()
+        if active != target and is_active[active] == False:
+            actives.push(active)
+            is_active[active] = True
+            \end{lstlisting}
+        \end{column}
+
+        \begin{column}{0.45\textwidth}
+            \begin{sidecomment}
+                \pause
+                \vskip 53bp
+                Initialize node and edge values
+                \\Distance of source is set to $V$
+
+                \pause
+                \vskip 22bp
+                Push flow to source neighbors
+
+                \pause
+                \vskip 53bp
+                Add to stack if not present
+            \end{sidecomment}
+        \end{column}
+    \end{columns}
+
+    \pause
+    \vspace*{\fill}
+    First edges, then vertices are iterated
+    \\Time complexity: $O(V+E)$
+\end{frame}
+
+\end{document}
