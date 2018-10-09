@@ -207,7 +207,7 @@ def stack_push_relabel(graph, source, target, capacity):
 \subsection{Initialization}
 \begin{frame}[fragile]{Initialization}
     \begin{columns}[T]
-        \begin{column}{0.50\textwidth}
+        \begin{column}{0.55\textwidth}
             \begin{lstlisting}
     # ...continues from push_relabel function
 
@@ -258,6 +258,91 @@ def stack_push_relabel(graph, source, target, capacity):
     \vspace*{\fill}
     First edges, then vertices are iterated
     \\Time complexity: $O(V+E)$
+\end{frame}
+
+\subsection{Main loop}
+\begin{frame}[fragile]{Main loop}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+    # ...continues from push_relabel function
+
+    cur_v = actives.pop()
+    while cur_v:
+        is_active[cur_v] = False
+
+        for out_e in cur_v.out_edges():
+            if (distance[cur_v] > distance[out_e.target()]
+                and capacity[out_e] - preflow[out_e] > 0):
+                helper.push(out_e, excess, capacity, preflow, reverse_edges)
+
+                active = out_e.target()
+                if active != source and active != target and is_active[active] == False:
+                    actives.push(active)
+                    is_active[active] = True
+
+                if (excess[cur_v] <= 0):
+                    break
+
+        if (excess[cur_v] > 0):
+            helper.relabel(cur_v, distance, capacity, preflow)
+            if not is_active[cur_v]:
+                actives.push(cur_v)
+                is_active[cur_v] = True
+
+        cur_v = actives.pop()
+
+    return preflow
+            \end{lstlisting}
+        \end{column}
+
+        \begin{column}{0.70\textwidth}
+            \begin{sidecomment}
+                \pause
+                \vskip 25bp
+                At each step a node is popped from the stack
+
+                \pause
+                \vskip 10bp
+                All possible pushes from it are performed...
+
+                \pause
+                \vskip 24bp
+                ...keeping track of any node that becomes active
+
+                \pause
+                \vskip 43bp
+                Current node is relabeled if still active
+
+                \pause
+                \vskip 33bp
+                When no active node is left the algorithm terminates returning the computed flow map
+            \end{sidecomment}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\subsection{Main loop complexity}
+\begin{frame}[fragile]{Main loop complexity}
+    \begin{itemize}
+        \item Max number of relabels per node: $2V+1$
+        \pause
+        \item Max number of scans of outgoing edges per vertex: $4V+1$
+        \pause
+        \item Global time spent to process a node $v$:
+              $$O(V\times deg_{out}(v))+O(1)\times n_{pushes}(v)$$
+        \pause
+        \item Summing over all vertices and recalling that the total number of pushes is $O(V^{2}E)$ we obtain:
+              $$O(V \sum_{v} deg_{out}(v)) + O(1) \times \sum_{v} n_{pushes}(v) = O(VE) + O(V^{2}E)$$
+        \pause
+        \item Hence main loop complexity is itself $O(V^{2}E)$
+    \end{itemize}
+\end{frame}
+
+%%% Benchmark results %%%
+\section{Benchmark results}
+
+\begin{frame}[fragile]{Benchmark results}
 \end{frame}
 
 \end{document}
