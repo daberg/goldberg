@@ -2,22 +2,37 @@
 
 \mode<presentation>
 {
-  \usetheme{default}
-  \usecolortheme{default}
+  \usetheme{Pittsburgh}
+  \usecolortheme{seagull}
   \usefonttheme{default}
   \setbeamertemplate{navigation symbols}{}
   \setbeamertemplate{caption}[numbered]
 }
 
+\AtBeginSection[]{
+    \begin{frame}
+        \vfill
+        \centering
+        \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+            \usebeamerfont{title}\insertsectionhead\par%
+        \end{beamercolorbox}
+        \vfill
+    \end{frame}
+}
+
 \usepackage[english]{babel}
-\usepackage[utf8x]{inputenc}
-\usepackage{listings}
 \usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
 
 \definecolor{codeblue}{rgb}{0,0,0.5}
 \definecolor{codered}{rgb}{0.6,0,0}
 \definecolor{codegreen}{rgb}{0,0.5,0}
 \definecolor{codeorange}{rgb}{0.9,0.6,0.1}
+
+\medmuskip=3mu
+\thinmuskip=4mu
+\thickmuskip=5mu
 
 \title{Goldberg's algorithm implementation and benchmarking in Python}
 \author{Davide Bergamaschi}
@@ -29,6 +44,7 @@
 \lstset{
     language=Python,
     basicstyle=\tiny\sffamily,
+    otherkeywords={True,False},
     keywordstyle=\color{codeblue},
     emph={push,relabel,stack_push_relabel,_create_residual_edges},
     emphstyle=\bf\color{codered},
@@ -45,8 +61,8 @@
   \tableofcontents
 \end{frame}
 
-%%% Algorithm analysis section %%%
-\section{Algorithm analysis}
+%%% Implementation analysis section %%%
+\section{Implementation analysis}
 
 %% Subsection template
 %\subsection{PARTNAME}
@@ -202,13 +218,11 @@ def stack_push_relabel(graph, source, target, capacity):
     \\Time complexity: $O(E)$, space complexity: $O(V+E)$
 \end{frame}
 
-\section{Introduction}
-
 \subsection{Initialization}
 \begin{frame}[fragile]{Initialization}
     \begin{columns}[T]
         \begin{column}{0.55\textwidth}
-            \begin{lstlisting}
+            \begin{lstlisting}[emph={}]
     # ...continues from push_relabel function
 
     for v in graph.vertices():
@@ -233,6 +247,8 @@ def stack_push_relabel(graph, source, target, capacity):
         if active != target and is_active[active] == False:
             actives.push(active)
             is_active[active] = True
+
+    #    continues...    #
             \end{lstlisting}
         \end{column}
 
@@ -264,7 +280,7 @@ def stack_push_relabel(graph, source, target, capacity):
 \begin{frame}[fragile]{Main loop}
     \begin{columns}[T]
         \begin{column}{0.50\textwidth}
-            \begin{lstlisting}
+            \begin{lstlisting}[emph={push,pop,relabel,helper,actives}, emphstyle=\bf]
     # ...continues from push_relabel function
 
     cur_v = actives.pop()
@@ -322,10 +338,10 @@ def stack_push_relabel(graph, source, target, capacity):
     \end{columns}
 \end{frame}
 
-\subsection{Main loop complexity}
+\subsection{Main loop time complexity}
 \begin{frame}[fragile]{Main loop complexity}
     \begin{itemize}
-        \item Max number of relabels per node: $2V+1$
+        \item Max number of relabels per node: $2V-1$
         \pause
         \item Max number of scans of outgoing edges per vertex: $4V+1$
         \pause
@@ -339,10 +355,39 @@ def stack_push_relabel(graph, source, target, capacity):
     \end{itemize}
 \end{frame}
 
+\subsection{Overall complexity}
+\begin{frame}[fragile]{Overall complexity}
+    \begin{itemize}
+        \setlength\itemsep{30bp}
+        \item Implementation time complexity: $O(V^{2}E)$
+        \pause
+        \item Implementation space complexity: $O(V+E)$
+    \end{itemize}
+\end{frame}
+
 %%% Benchmark results %%%
 \section{Benchmark results}
 
-\begin{frame}[fragile]{Benchmark results}
+\subsection{Number of vertices}
+\begin{frame}[fragile]{Execution time vs number of vertices}
+    \begin{figure}
+    \includegraphics[width=1\textwidth]{time_vertices.pdf}
+    \end{figure}
+
+    \pause
+    \begin{center}
+        Execution time superlinear in the number of vertices...
+    \end{center}
+\end{frame}
+
+\subsection{Number of edges}
+\begin{frame}[fragile]{Execution time vs number of edges}
+    \includegraphics[width=1\textwidth]{time_edges.pdf}
+
+    \pause
+    \begin{center}
+        ...and linear in the number of edges
+    \end{center}
 \end{frame}
 
 \end{document}
